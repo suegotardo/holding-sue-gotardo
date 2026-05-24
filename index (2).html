@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUE HOLDING — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --surface2: #f8f9fa;
+  --border: #e8eaed;
+  --border2: #dde1e7;
+  --text: #1a1d23;
+  --text2: #5f6368;
+  --text3: #9aa0a6;
+  --accent: #4f46e5;
+  --accent-lt: #eef2ff;
+  --green: #16a34a;
+  --green-lt: #f0fdf4;
+  --red: #dc2626;
+  --red-lt: #fef2f2;
+  --orange: #ea580c;
+  --orange-lt: #fff7ed;
+  --blue: #2563eb;
+  --blue-lt: #eff6ff;
+  --yellow: #d97706;
+  --yellow-lt: #fffbeb;
+  --gray: #6b7280;
+  --sans: 'Inter', sans-serif;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; }
+
+/* HEADER */
+.site-header {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:20px 24px 16px;
+}
+.site-header-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:16px;
+}
+.site-title { font-size:22px; font-weight:800; color:var(--text); line-height:1.2; }
+.site-subtitle { font-size:13px; color:var(--text2); margin-top:4px; }
+.live-pill {
+  display:flex; align-items:center; gap:6px;
+  font-size:12px; color:var(--text2); margin-top:8px;
+}
+.live-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; flex-shrink:0; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+.header-date { text-align:right; }
+.header-date .hd-label { font-size:12px; color:var(--text2); }
+.header-date .hd-val { font-size:13px; font-weight:600; color:var(--text); }
+
+/* NAV */
+.nav-wrap {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:100;
+}
+.nav-tabs {
+  display:flex; overflow-x:auto; gap:0;
+  padding:0 24px;
+}
+.nav-tabs::-webkit-scrollbar { display:none; }
+.tab {
+  padding:14px 18px;
+  font-size:14px; font-weight:500;
+  color:var(--text2);
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;
+  transition:all .15s;
+  user-select:none;
+}
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
+
+/* MAIN */
+.page { display:none; padding:20px 24px 60px; animation:fadeUp .25s ease; }
+.page.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+/* TICKER TAPE */
+.ticker-tape {
+  background:var(--text);
+  overflow:hidden; height:34px;
+  display:flex; align-items:center;
+}
+.ticker-inner {
+  display:flex; gap:32px;
+  animation:scroll 50s linear infinite;
+  white-space:nowrap; padding:0 16px;
+}
+@keyframes scroll { 0%{transform:translateX(0);} 100%{transform:translateX(-50%);} }
+.tick { font-size:12px; display:flex; gap:6px; align-items:center; color:rgba(255,255,255,.5); }
+.tick .t-nm { color:rgba(255,255,255,.8); font-weight:600; }
+.tick .t-pr { color:#fff; font-weight:500; }
+.tick .up { color:#4ade80; }
+.tick .dn { color:#f87171; }
+
+/* SECTION */
+.sec-title {
+  font-size:14px; font-weight:700; color:var(--text);
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:14px;
+}
+.sec-title::before { content:''; width:3px; height:16px; background:var(--accent); border-radius:2px; }
+.sec-sub { font-size:12px; color:var(--text3); font-weight:400; }
+
+/* KPI CARDS — estilo Tonetto */
+.kpi-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px; }
+.kpi-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-left:3px solid var(--accent);
+  border-radius:var(--radius);
+  padding:16px;
+  box-shadow:var(--shadow);
+}
+.kpi-card.green { border-left-color:var(--green); }
+.kpi-card.orange { border-left-color:var(--orange); }
+.kpi-card.blue { border-left-color:var(--blue); }
+.kpi-label {
+  font-size:11px; font-weight:600; letter-spacing:.8px;
+  text-transform:uppercase; color:var(--text2); margin-bottom:8px;
+}
+.kpi-value {
+  font-size:24px; font-weight:800; color:var(--accent); line-height:1;
+}
+.kpi-value.orange { color:var(--orange); }
+.kpi-value.green { color:var(--green); }
+.kpi-value.blue { color:var(--blue); }
+.kpi-note { font-size:12px; color:var(--text2); margin-top:6px; }
+
+/* ATIVO CARD — estilo Tonetto exato */
+.ativos-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+@media(max-width:640px) { .ativos-grid { grid-template-columns:1fr; } }
+
+.ativo-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:var(--shadow);
+  transition:box-shadow .2s;
+}
+.ativo-card:hover { box-shadow:var(--shadow-md); }
+
+.ativo-card-top { margin-bottom:14px; }
+.ativo-card-name { font-size:18px; font-weight:800; color:var(--text); letter-spacing:-.3px; }
+.ativo-card-setor { font-size:13px; color:var(--text2); margin-top:2px; }
+
+.ativo-card-price-row {
+  display:flex; align-items:center; gap:12px; margin:12px 0;
+}
+.ativo-icon {
+  width:46px; height:46px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:800; color:#fff; letter-spacing:.5px;
+  flex-shrink:0;
+}
+.ativo-price-block {}
+.ativo-price {
+  font-size:26px; font-weight:800; color:var(--text);
+  letter-spacing:-.5px; line-height:1;
+}
+.ativo-chg {
+  font-size:14px; font-weight:600; margin-top:3px;
+  display:flex; align-items:center; gap:3px;
+}
+.ativo-chg.up { color:var(--green); }
+.ativo-chg.dn { color:var(--red); }
+
+.ativo-divider { height:1px; background:var(--border); margin:12px 0; }
+
+.ativo-metrics {
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px 6px;
+}
+.ativo-metric {}
+.ativo-metric-label {
+  font-size:10px; font-weight:700; letter-spacing:.8px;
+  text-transform:uppercase; color:var(--text3); margin-bottom:3px;
+}
+.ativo-metric-val {
+  font-size:13px; font-weight:700; color:var(--text);
+}
+.ativo-metric-val.ms-pos { color:var(--green); }
+.ativo-metric-val.ms-neg { color:var(--red); }
+.ativo-metric-val.ms-warn { color:var(--orange); }
+
+/* Barra de Margem de Segurança */
+.ativo-ms-bar {
+  margin-top:14px; height:5px; border-radius:3px;
+  background:var(--border2); overflow:hidden;
+}
+.ativo-ms-fill { height:100%; border-radius:3px; }
+
+/* Badge nota */
+.nota-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 9px; border-radius:20px;
+  font-size:11px; font-weight:700;
+}
+.nota-badge.buy { background:var(--green-lt); color:var(--green); }
+.nota-badge.hold { background:var(--yellow-lt); color:var(--yellow); }
+.nota-badge.wait { background:var(--red-lt); color:var(--red); }
+
+/* SORT HEADER */
+.sort-row {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:14px;
+}
+.sort-title { font-size:15px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+.sort-title::before { content:''; width:3px; height:16px; background:var(--accent); border-radius:2px; }
+.sort-meta { font-size:12px; color:var(--text3); }
+.sort-select {
+  font-family:var(--sans); font-size:13px; font-weight:500;
+  color:var(--text); background:var(--surface);
+  border:1px solid var(--border2); border-radius:8px;
+  padding:7px 12px; cursor:pointer; outline:none;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239aa0a6' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center;
+  padding-right:30px;
+}
+
+/* CHART CARDS */
+.chart-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:20px; box-shadow:var(--shadow);
+  margin-bottom:14px;
+}
+.chart-card-title {
+  font-size:13px; font-weight:700; color:var(--text); margin-bottom:14px;
+  display:flex; align-items:center; gap:6px;
+}
+.chart-card-title::before { content:''; width:3px; height:13px; background:var(--accent); border-radius:2px; }
+
+/* PROVENTOS */
+.prov-badge {
+  display:inline-block; padding:2px 8px; border-radius:20px;
+  font-size:11px; font-weight:700;
+}
+.prov-badge.div { background:var(--blue-lt); color:var(--blue); }
+.prov-badge.jcp { background:var(--yellow-lt); color:var(--yellow); }
+.prov-badge.prov { background:var(--green-lt); color:var(--green); }
+
+/* TABLE */
+.tbl-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border); }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead th {
+  background:var(--surface2); color:var(--text2);
+  font-size:10px; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+  padding:10px 14px; text-align:right; border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+thead th:first-child { text-align:left; }
+tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:var(--surface2); }
+tbody td { padding:11px 14px; text-align:right; color:var(--text2); }
+tbody td:first-child { text-align:left; color:var(--text); font-weight:600; }
+.td-green { color:var(--green); font-weight:600; }
+.td-red { color:var(--red); font-weight:600; }
+.td-orange { color:var(--orange); font-weight:600; }
+
+/* ATENCAO */
+.atc-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px;
+  display:flex; gap:12px; align-items:flex-start;
+  margin-bottom:10px; box-shadow:var(--shadow);
+}
+.atc-item.buy { border-left:3px solid var(--green); }
+.atc-item.warn { border-left:3px solid var(--orange); }
+.atc-item.info { border-left:3px solid var(--blue); }
+.atc-icon { font-size:18px; flex-shrink:0; }
+.atc-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom:4px; }
+.atc-desc { font-size:12px; color:var(--text2); line-height:1.6; }
+
+/* NEWS */
+.news-item { padding:14px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; align-items:flex-start; }
+.news-item:last-child { border-bottom:none; }
+.news-tk { padding:3px 8px; border-radius:6px; background:var(--accent-lt); color:var(--accent); font-size:11px; font-weight:700; flex-shrink:0; margin-top:2px; }
+.news-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:3px; line-height:1.4; }
+.news-meta { font-size:11px; color:var(--text3); }
+
+/* DESEMPENHO */
+.desemp-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.desemp-ano { font-size:12px; font-weight:700; color:var(--text2); width:36px; }
+.desemp-track { flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+.desemp-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--accent),#818cf8); }
+.desemp-val { font-size:12px; font-weight:700; color:var(--accent); width:80px; text-align:right; }
+
+/* META BAR */
+.meta-track { height:10px; background:var(--border); border-radius:5px; overflow:hidden; margin:8px 0; }
+.meta-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,var(--orange),#f97316); }
+
+/* INFO BANNER */
+.info-banner {
+  background:var(--accent-lt); border:1px solid #c7d2fe;
+  border-radius:10px; padding:12px 16px;
+  font-size:12px; color:var(--accent); margin-bottom:16px;
+  display:flex; gap:8px; align-items:center;
+}
+
+/* LOADING */
+.loading { text-align:center; padding:32px; color:var(--text3); font-size:13px; }
+
+/* GRID UTIL */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+
+@media(max-width:700px) {
+  .g2 { grid-template-columns:1fr; }
+  .g3 { grid-template-columns:1fr; }
+  .page { padding:16px 16px 60px; }
+  .kpi-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TICKER TAPE -->
+<div class="ticker-tape">
+<div class="ticker-inner" id="tickerInner">
+  <!-- preenchido via JS -->
+</div>
+</div>
+
+<!-- HEADER -->
+<div class="site-header">
+  <div class="site-header-top">
+    <div>
+      <div class="site-title">SUE HOLDING</div>
+      <div class="site-subtitle">Carteira consolidada · dados ao vivo</div>
+      <div class="live-pill"><span class="live-dot"></span> ao vivo · <span id="headerDate">—</span></div>
+    </div>
+    <div class="header-date">
+      <div class="hd-label" id="hdDiaSemana"></div>
+      <div class="hd-val" id="hdData"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-wrap">
+<div class="nav-tabs">
+  <div class="tab active" data-page="carteira">Carteira</div>
+  <div class="tab" data-page="noticias">Notícias</div>
+  <div class="tab" data-page="fiis">FIIs</div>
+  <div class="tab" data-page="acoes">Ações</div>
+  <div class="tab" data-page="proventos">Proventos</div>
+  <div class="tab" data-page="atencao">Pontos de Atenção</div>
+  <div class="tab" data-page="desempenho">Desempenho</div>
+</div>
+</div>
+
+<!-- ═══════════════ CARTEIRA ═══════════════ -->
+<div class="page active" id="page-carteira">
+
+  <div class="info-banner">
+    📊 SUE HOLDING Dashboard — <span id="bannerData">—</span>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Patrimônio Total BR</div>
+      <div class="kpi-value" id="kpi-total">R$ 97.010</div>
+      <div class="kpi-note">RV + Renda Fixa</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Ações BR</div>
+      <div class="kpi-value blue" id="kpi-acoes">Calculando…</div>
+      <div class="kpi-note" id="kpi-acoes-pct">% do total</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">FIIs</div>
+      <div class="kpi-value green" id="kpi-fiis">Calculando…</div>
+      <div class="kpi-note" id="kpi-fiis-pct">% do total</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Meta Renda — R$ 6.376/mês</div>
+      <div class="kpi-value orange" id="kpi-meta-pct">5%</div>
+      <div class="kpi-note" id="kpi-meta-gap">faltam R$ 6.065/mês</div>
+    </div>
+  </div>
+
+  <!-- Meta bar -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow);">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:6px;">
+      <span style="font-weight:700;">Meta Independência 2036 — R$ 6.376/mês</span>
+      <span id="metaPctLabel" style="color:var(--orange);font-weight:700;">5%</span>
+    </div>
+    <div class="meta-track"><div class="meta-fill" id="metaBar" style="width:5%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px;">
+      <span id="rendaAtual">Renda atual: R$ 311/mês</span>
+      <span>Meta: R$ 6.376/mês em 2036</span>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="chart-card">
+      <div class="chart-card-title">Distribuição da Carteira</div>
+      <canvas id="cPie" style="height:190px;"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Ações por Setor</div>
+      <canvas id="cSetores" style="height:190px;"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">FIIs por Segmento</div>
+      <canvas id="cFiiSeg" style="height:190px;"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-card-title">Projeção de Renda Passiva 2026–2036</div>
+    <canvas id="cProjecao" style="height:200px;"></canvas>
+  </div>
+</div>
+
+<!-- ═══════════════ NOTÍCIAS ═══════════════ -->
+<div class="page" id="page-noticias">
+  <div class="g2">
+    <div class="chart-card" style="margin-bottom:0;">
+      <div class="chart-card-title">Últimas Notícias</div>
+      <div id="newsMain"><div class="loading">Buscando notícias…</div></div>
+    </div>
+    <div class="chart-card" style="margin-bottom:0;">
+      <div class="chart-card-title">Fatos Relevantes & Dividendos</div>
+      <div id="newsAlt"><div class="loading">Buscando…</div></div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--text3);margin-top:12px;padding:10px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+    Somente ativos da sua carteira. Confirme sempre na fonte antes de decidir. Não é recomendação de investimento.
+  </div>
+</div>
+
+<!-- ═══════════════ FIIS ═══════════════ -->
+<div class="page" id="page-fiis">
+  <div class="sort-row">
+    <div class="sort-title">FIIs <span class="sort-meta" id="fiis-ts">— preços ao vivo</span></div>
+    <select class="sort-select" id="sortFiis" onchange="renderFiis()">
+      <option value="default">Ordenar: Padrão</option>
+      <option value="ms-desc">Maior M.S.</option>
+      <option value="ms-asc">Menor M.S.</option>
+      <option value="part-desc">Maior Participação</option>
+      <option value="rentab-desc">Maior Rentabilidade</option>
+    </select>
+  </div>
+  <div class="ativos-grid" id="gridFiis"></div>
+</div>
+
+<!-- ═══════════════ AÇÕES ═══════════════ -->
+<div class="page" id="page-acoes">
+  <div class="sort-row">
+    <div class="sort-title">Ações <span class="sort-meta" id="acoes-ts">— preços ao vivo</span></div>
+    <select class="sort-select" id="sortAcoes" onchange="renderAcoes()">
+      <option value="default">Ordenar: Padrão</option>
+      <option value="ms-desc">Maior M.S.</option>
+      <option value="ms-asc">Menor M.S.</option>
+      <option value="part-desc">Maior Participação</option>
+      <option value="rentab-desc">Maior Rentabilidade</option>
+    </select>
+  </div>
+  <div class="ativos-grid" id="gridAcoes"></div>
+</div>
+
+<!-- ═══════════════ PROVENTOS ═══════════════ -->
+<div class="page" id="page-proventos">
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card green">
+      <div class="kpi-label">Total Recebido (12m)</div>
+      <div class="kpi-value green" id="prov-total">—</div>
+      <div class="kpi-note">Dividendos + Proventos</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Média Mensal</div>
+      <div class="kpi-value" id="prov-media">—</div>
+      <div class="kpi-note">Últimos 12 meses</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Melhor Mês</div>
+      <div class="kpi-value orange" id="prov-best">—</div>
+      <div class="kpi-note" id="prov-best-mes">—</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="chart-card">
+      <div class="chart-card-title">Proventos por Mês — Últimos 12m</div>
+      <canvas id="cProvMes" style="height:200px;"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Proventos por Ativo — Acumulado</div>
+      <canvas id="cProvAtivo" style="height:200px;"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-card-title">Histórico Completo</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Data</th><th>Ativo</th><th>Tipo</th><th>R$/unit</th><th>Qtd</th><th>Total</th></tr></thead>
+        <tbody id="tbProvs"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PONTOS DE ATENÇÃO ═══════════════ -->
+<div class="page" id="page-atencao">
+  <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">
+    Pontos gerados automaticamente com base em DY, rentabilidade e alocação. Não são recomendação de investimento.
+  </div>
+  <div id="atencaoList" style="max-width:800px;"></div>
+</div>
+
+<!-- ═══════════════ DESEMPENHO ═══════════════ -->
+<div class="page" id="page-desempenho">
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card">
+      <div class="kpi-label">Custo Total Investido</div>
+      <div class="kpi-value">R$ 37.586</div>
+      <div class="kpi-note">Preço médio × quantidade</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Valor de Mercado RV</div>
+      <div class="kpi-value green" id="desemp-mercado">Calculando…</div>
+      <div class="kpi-note">Cotação atual × quantidade</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Resultado</div>
+      <div class="kpi-value blue" id="desemp-resultado">Calculando…</div>
+      <div class="kpi-note">Valor mercado − custo</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="chart-card">
+      <div class="chart-card-title">Proventos Recebidos por Ano</div>
+      <canvas id="cProvAnual" style="height:220px;"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Desempenho Anual</div>
+      <div id="desempRows" style="padding-top:4px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DADOS ────────────────────────────────────────────────────
+const FIIS = [
+  {ticker:'XPLG11',nome:'XP Log',qtd:19,pm:100.76,dy:0.0973,teto:110,seg:'Logística',nota:'Segurar',cor:'#6366f1'},
+  {ticker:'KNCR11',nome:'Kinea CRI',qtd:17,pm:105.57,dy:0.1377,teto:115,seg:'Papel',nota:'Comprar',cor:'#0ea5e9'},
+  {ticker:'HGBS11',nome:'CSHG Shopping',qtd:195,pm:21.09,dy:0.0901,teto:23,seg:'Shopping',nota:'Segurar',cor:'#8b5cf6'},
+  {ticker:'BTLG11',nome:'BTG Logística',qtd:87,pm:103.50,dy:0.0916,teto:112,seg:'Logística',nota:'Comprar',cor:'#2563eb'},
+  {ticker:'RBRY11',nome:'RBR High Grade',qtd:20,pm:95.59,dy:0.1506,teto:105,seg:'Papel',nota:'Comprar',cor:'#16a34a'},
+  {ticker:'TRXB11',nome:'TRX Real Estate',qtd:18,pm:175.71,dy:0.1564,teto:190,seg:'Imobiliário',nota:'Comprar',cor:'#dc2626'},
+  {ticker:'TVRI11',nome:'Tivio RI',qtd:5,pm:100.03,dy:0.1281,teto:108,seg:'Agências',nota:'Segurar',cor:'#d97706'},
+];
+const ACOES = [
+  {ticker:'SBSP3',nome:'Sabesp',qtd:10,pm:128.32,dy:0.0407,teto:140,setor:'Saneamento',nota:'Segurar',cor:'#0ea5e9'},
+  {ticker:'BBAS3',nome:'Banco do Brasil',qtd:110,pm:23.14,dy:0.0368,teto:27,setor:'Banco',nota:'Segurar',cor:'#fbbf24'},
+  {ticker:'BBSE3',nome:'BB Seguridade',qtd:141,pm:34.68,dy:0.1322,teto:38,setor:'Seguradora',nota:'Comprar',cor:'#1d4ed8'},
+  {ticker:'ISAE4',nome:'Isa Energias',qtd:50,pm:30.49,dy:0.0635,teto:34,setor:'Energia',nota:'Segurar',cor:'#059669'},
+  {ticker:'CXSE3',nome:'Caixa Seguridade',qtd:220,pm:18.69,dy:0.0713,teto:21,setor:'Seguradora',nota:'Comprar',cor:'#0284c7'},
+  {ticker:'CSAN3',nome:'Cosan',qtd:200,pm:5.26,dy:0.0543,teto:7,setor:'Logística',nota:'Aguardar',cor:'#dc2626'},
+  {ticker:'VAMO3',nome:'Vamos',qtd:180,pm:6.71,dy:0.0342,teto:9,setor:'Locação',nota:'Aguardar',cor:'#7c3aed'},
+];
+const PROVENTOS = [
+  {data:'2025-01-15',ticker:'BBSE3',tipo:'Dividendo',vUnit:0.38,qtd:120,total:45.60},
+  {data:'2025-01-20',ticker:'HGBS11',tipo:'Provento',vUnit:0.11,qtd:195,total:21.45},
+  {data:'2025-02-14',ticker:'BBAS3',tipo:'Dividendo',vUnit:0.07,qtd:110,total:7.70},
+  {data:'2025-02-17',ticker:'BTLG11',tipo:'Provento',vUnit:0.79,qtd:87,total:68.73},
+  {data:'2025-02-17',ticker:'KNCR11',tipo:'Provento',vUnit:1.21,qtd:17,total:20.57},
+  {data:'2025-02-17',ticker:'XPLG11',tipo:'Provento',vUnit:0.82,qtd:19,total:15.58},
+  {data:'2025-03-14',ticker:'BBSE3',tipo:'Dividendo',vUnit:0.38,qtd:141,total:53.58},
+  {data:'2025-03-17',ticker:'HGBS11',tipo:'Provento',vUnit:0.11,qtd:195,total:21.45},
+  {data:'2025-03-17',ticker:'TRXB11',tipo:'Provento',vUnit:2.29,qtd:18,total:41.22},
+  {data:'2025-04-14',ticker:'BBAS3',tipo:'Dividendo',vUnit:0.07,qtd:110,total:7.70},
+  {data:'2025-04-17',ticker:'BTLG11',tipo:'Provento',vUnit:0.79,qtd:87,total:68.73},
+  {data:'2025-04-17',ticker:'KNCR11',tipo:'Provento',vUnit:1.21,qtd:17,total:20.57},
+  {data:'2025-04-17',ticker:'RBRY11',tipo:'Provento',vUnit:1.20,qtd:20,total:24.00},
+  {data:'2025-04-17',ticker:'XPLG11',tipo:'Provento',vUnit:0.82,qtd:19,total:15.58},
+  {data:'2025-05-14',ticker:'BBSE3',tipo:'Dividendo',vUnit:0.54,qtd:141,total:76.14},
+  {data:'2025-05-17',ticker:'HGBS11',tipo:'Provento',vUnit:0.11,qtd:195,total:21.45},
+  {data:'2025-05-17',ticker:'TRXB11',tipo:'Provento',vUnit:2.29,qtd:18,total:41.22},
+  {data:'2025-05-17',ticker:'TVRI11',tipo:'Provento',vUnit:1.07,qtd:5,total:5.35},
+  {data:'2025-06-14',ticker:'BBAS3',tipo:'Dividendo',vUnit:0.07,qtd:110,total:7.70},
+  {data:'2025-06-17',ticker:'BTLG11',tipo:'Provento',vUnit:0.79,qtd:87,total:68.73},
+  {data:'2025-06-17',ticker:'KNCR11',tipo:'Provento',vUnit:1.21,qtd:17,total:20.57},
+  {data:'2025-06-17',ticker:'XPLG11',tipo:'Provento',vUnit:0.82,qtd:19,total:15.58},
+  {data:'2025-07-14',ticker:'BBSE3',tipo:'Dividendo',vUnit:0.38,qtd:141,total:53.58},
+  {data:'2025-07-17',ticker:'HGBS11',tipo:'Provento',vUnit:0.11,qtd:195,total:21.45},
+  {data:'2025-07-17',ticker:'TRXB11',tipo:'Provento',vUnit:2.29,qtd:18,total:41.22},
+  {data:'2025-07-17',ticker:'RBRY11',tipo:'Provento',vUnit:1.20,qtd:20,total:24.00},
+  {data:'2025-08-14',ticker:'BBAS3',tipo:'Dividendo',vUnit:0.07,qtd:110,total:7.70},
+  {data:'2025-08-17',ticker:'BTLG11',tipo:'Provento',vUnit:0.79,qtd:87,total:68.73},
+  {data:'2025-08-17',ticker:'KNCR11',tipo:'Provento',vUnit:1.21,qtd:17,total:20.57},
+  {data:'2025-08-17',ticker:'XPLG11',tipo:'Provento',vUnit:0.82,qtd:19,total:15.58},
+  {data:'2025-09-14',ticker:'BBSE3',tipo:'Dividendo',vUnit:0.54,qtd:141,total:76.14},
+  {data:'2025-09-17',ticker:'HGBS11',tipo:'Provento',vUnit:0.11,qtd:195,total:21.45},
+  {data:'2025-09-17',ticker:'TRXB11',tipo:'Provento',vUnit:2.29,qtd:18,total:41.22},
+  {data:'2025-09-17',ticker:'TVRI11',tipo:'Provento',vUnit:1.07,qtd:5,total:5.35},
+  {data:'2025-10-14',ticker:'BBAS3',tipo:'Dividendo',vUnit:0.07,qtd:110,total:7.70},
+  {data:'2025-10-17',ticker:'BTLG11',tipo:'Provento',vUnit:0.79,qtd:87,total:68.73},
+  {data:'2025-10-17',ticker:'KNCR11',tipo:'Provento',vUnit:1.21,qtd:17,total:20.57},
+  {data:'2025-10-17',ticker:'XPLG11',tipo:'Provento',vUnit:0.82,qtd:19,total:15.58},
+  {data:'2025-11-14',ticker:'BBSE3',tipo:'Dividendo',vUnit:0.38,qtd:141,total:53.58},
+  {data:'2025-11-17',ticker:'HGBS11',tipo:'Provento',vUnit:0.11,qtd:195,total:21.45},
+  {data:'2025-11-17',ticker:'TRXB11',tipo:'Provento',vUnit:2.29,qtd:18,total:41.22},
+  {data:'2025-11-17',ticker:'RBRY11',tipo:'Provento',vUnit:1.20,qtd:20,total:24.00},
+  {data:'2025-12-17',ticker:'BTLG11',tipo:'Provento',vUnit:0.79,qtd:87,total:68.73},
+  {data:'2025-12-17',ticker:'KNCR11',tipo:'Provento',vUnit:1.21,qtd:17,total:20.57},
+  {data:'2025-12-17',ticker:'XPLG11',tipo:'Provento',vUnit:0.82,qtd:19,total:15.58},
+  {data:'2026-01-14',ticker:'BBSE3',tipo:'Dividendo',vUnit:0.54,qtd:141,total:76.14},
+  {data:'2026-01-17',ticker:'HGBS11',tipo:'Provento',vUnit:0.11,qtd:195,total:21.45},
+  {data:'2026-01-17',ticker:'TRXB11',tipo:'Provento',vUnit:2.29,qtd:18,total:41.22},
+  {data:'2026-01-17',ticker:'TVRI11',tipo:'Provento',vUnit:1.07,qtd:5,total:5.35},
+  {data:'2026-02-17',ticker:'BTLG11',tipo:'Provento',vUnit:0.79,qtd:87,total:68.73},
+  {data:'2026-02-17',ticker:'KNCR11',tipo:'Provento',vUnit:1.21,qtd:17,total:20.57},
+  {data:'2026-02-17',ticker:'RBRY11',tipo:'Provento',vUnit:1.20,qtd:20,total:24.00},
+  {data:'2026-02-17',ticker:'XPLG11',tipo:'Provento',vUnit:0.82,qtd:19,total:15.58},
+  {data:'2026-03-14',ticker:'BBSE3',tipo:'Dividendo',vUnit:0.38,qtd:141,total:53.58},
+  {data:'2026-03-17',ticker:'HGBS11',tipo:'Provento',vUnit:0.11,qtd:195,total:21.45},
+  {data:'2026-03-17',ticker:'TRXB11',tipo:'Provento',vUnit:2.29,qtd:18,total:41.22},
+  {data:'2026-04-17',ticker:'BTLG11',tipo:'Provento',vUnit:0.79,qtd:87,total:68.73},
+  {data:'2026-04-17',ticker:'KNCR11',tipo:'Provento',vUnit:1.21,qtd:17,total:20.57},
+  {data:'2026-04-17',ticker:'XPLG11',tipo:'Provento',vUnit:0.82,qtd:19,total:15.58},
+  {data:'2026-05-14',ticker:'BBSE3',tipo:'Dividendo',vUnit:0.54,qtd:141,total:76.14},
+  {data:'2026-05-17',ticker:'HGBS11',tipo:'Provento',vUnit:0.11,qtd:195,total:21.45},
+  {data:'2026-05-17',ticker:'TRXB11',tipo:'Provento',vUnit:2.29,qtd:18,total:41.22},
+  {data:'2026-05-17',ticker:'TVRI11',tipo:'Provento',vUnit:1.07,qtd:5,total:5.35},
+];
+
+// ── ESTADO ───────────────────────────────────────────────────
+const prices = {};
+const fmt = v => 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtN = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtPc = v => (v>=0?'+':'')+v.toFixed(2)+'%';
+const fmtPct = v => (v*100).toFixed(1)+'%';
+const getP = (tk,pm) => prices[tk]?.price ?? pm;
+
+// ── DATA / HORA ───────────────────────────────────────────────
+function setupDate(){
+  const now = new Date();
+  const dias = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const ds = dias[now.getDay()]+', '+now.getDate()+' de '+meses[now.getMonth()]+' de '+now.getFullYear();
+  const ds2 = String(now.getDate()).padStart(2,'0')+'/'+(String(now.getMonth()+1)).padStart(2,'0')+'/'+now.getFullYear();
+  document.getElementById('hdDiaSemana').textContent = ds;
+  document.getElementById('hdData').textContent = ds2;
+  document.getElementById('headerDate').textContent = ds2;
+  document.getElementById('bannerData').textContent = 'dados ao vivo · '+ds2;
+}
+
+// ── BRAPI ────────────────────────────────────────────────────
+const ALL_TK = [...FIIS.map(f=>f.ticker),...ACOES.map(a=>a.ticker)];
+async function fetchPrices(){
+  try{
+    const r = await fetch('https://brapi.dev/api/quote/'+ALL_TK.join(',')+'?token=demo');
+    const d = await r.json();
+    if(d.results){
+      d.results.forEach(q=>{
+        prices[q.symbol]={price:q.regularMarketPrice,chg:q.regularMarketChangePercent};
+      });
+      renderTicker();
+      renderAcoes();
+      renderFiis();
+      updateKPIs();
+      document.querySelectorAll('[id$="-ts"]').forEach(el=>{
+        el.textContent = '— preços ao vivo · '+new Date().toLocaleTimeString('pt-BR');
+      });
+    }
+  }catch(e){
+    document.querySelectorAll('[id$="-ts"]').forEach(el=>{
+      el.textContent = '— preço médio (sem cotação ao vivo)';
+    });
+  }
+}
+
+// ── TICKER TAPE ───────────────────────────────────────────────
+function renderTicker(){
+  const items = ALL_TK.map(tk=>{
+    const q = prices[tk], pm = [...FIIS,...ACOES].find(a=>a.ticker===tk)?.pm??0;
+    const p = q?.price??pm, chg = q?.chg??0;
+    const cls = chg>=0?'up':'dn';
+    return '<span class="tick"><span class="t-nm">'+tk+'</span><span class="t-pr">R$ '+p.toFixed(2)+'</span><span class="'+cls+'">'+(chg>=0?'▲':'▼')+Math.abs(chg).toFixed(2)+'%</span></span>';
+  });
+  const html = items.join('') + items.join(''); // duplo para loop
+  document.getElementById('tickerInner').innerHTML = html;
+}
+
+// ── KPIs ─────────────────────────────────────────────────────
+function updateKPIs(){
+  const vFiis = FIIS.reduce((s,f)=>s+f.qtd*getP(f.ticker,f.pm),0);
+  const vAcoes = ACOES.reduce((s,a)=>s+a.qtd*getP(a.ticker,a.pm),0);
+  const totalRV = vFiis+vAcoes;
+  const totalBR = totalRV+57993.87;
+  const renda = [...FIIS,...ACOES].reduce((s,a)=>s+(a.qtd*getP(a.ticker,a.pm))*a.dy/12,0);
+  const pct = renda/6376*100;
+
+  document.getElementById('kpi-total').textContent = fmt(totalBR);
+  document.getElementById('kpi-acoes').textContent = fmt(vAcoes);
+  document.getElementById('kpi-acoes-pct').textContent = (vAcoes/totalBR*100).toFixed(1)+'% do total';
+  document.getElementById('kpi-fiis').textContent = fmt(vFiis);
+  document.getElementById('kpi-fiis-pct').textContent = (vFiis/totalBR*100).toFixed(1)+'% do total';
+  document.getElementById('kpi-meta-pct').textContent = pct.toFixed(1)+'%';
+  document.getElementById('kpi-meta-gap').textContent = 'faltam '+fmt(6376-renda)+'/mês';
+  document.getElementById('metaBar').style.width = Math.min(pct,100)+'%';
+  document.getElementById('metaPctLabel').textContent = pct.toFixed(1)+'%';
+  document.getElementById('rendaAtual').textContent = 'Renda atual: '+fmt(renda)+'/mês';
+  document.getElementById('desemp-mercado') && (document.getElementById('desemp-mercado').textContent = fmt(totalRV));
+  const custo = [...FIIS,...ACOES].reduce((s,a)=>s+a.qtd*a.pm,0);
+  const res = totalRV-custo;
+  const elR = document.getElementById('desemp-resultado');
+  if(elR){ elR.textContent = (res>=0?'+':'')+fmt(res); elR.className = 'kpi-value '+(res>=0?'green':'red'); }
+}
+
+// ── CARD ATIVO ────────────────────────────────────────────────
+function msColor(ms){
+  if(ms>10) return '#16a34a';
+  if(ms>0)  return '#d97706';
+  return '#dc2626';
+}
+function msCls(ms){
+  if(ms>10) return 'ms-pos';
+  if(ms>0)  return 'ms-warn';
+  return 'ms-neg';
+}
+function msBarColor(ms){
+  if(ms>10) return '#16a34a';
+  if(ms>0)  return '#d97706';
+  return '#dc2626';
+}
+function msBarWidth(ms){
+  // barra representa quanto do teto já foi atingido
+  return Math.min(Math.max((1-(ms/100))*100,5),100);
+}
+function notaHTML(nota){
+  const map = {Comprar:'buy',Segurar:'hold',Aguardar:'wait'};
+  return '<span class="nota-badge '+map[nota]+'">'+nota+'</span>';
+}
+
+function ativoCard(a, isFii){
+  const p = getP(a.ticker, a.pm);
+  const q = prices[a.ticker];
+  const chg = q?.chg ?? 0;
+  const totalInv = a.qtd * a.pm;
+  const valorAtual = a.qtd * p;
+  const ms = ((a.teto - p) / p * 100);
+  const part = valorAtual / ([...FIIS,...ACOES].reduce((s,x)=>s+x.qtd*getP(x.ticker,x.pm),0)) * 100;
+  const rendaMes = valorAtual * a.dy / 12;
+  const chgCls = chg >= 0 ? 'up' : 'dn';
+  const chgArr = chg >= 0 ? '▲' : '▼';
+  const tkShort = a.ticker.replace(/[0-9]+$/,'').slice(0,4);
+  const barW = msBarWidth(ms);
+
+  return `<div class="ativo-card">
+    <div class="ativo-card-top">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="ativo-card-name">${a.ticker}</div>
+          <div class="ativo-card-setor">${isFii ? a.seg : a.setor}</div>
+        </div>
+        ${notaHTML(a.nota)}
+      </div>
+    </div>
+
+    <div class="ativo-card-price-row">
+      <div class="ativo-icon" style="background:${a.cor};">${tkShort}</div>
+      <div class="ativo-price-block">
+        <div class="ativo-price">R$&nbsp;${fmtN(p)}</div>
+        <div class="ativo-chg ${chgCls}">${chgArr}&nbsp;${Math.abs(chg).toFixed(2)}%</div>
+      </div>
+    </div>
+
+    <div class="ativo-divider"></div>
+
+    <div class="ativo-metrics">
+      <div class="ativo-metric">
+        <div class="ativo-metric-label">M.S.</div>
+        <div class="ativo-metric-val ${msCls(ms)}">${ms>0?'+':''}${ms.toFixed(2)}%</div>
+      </div>
+      <div class="ativo-metric">
+        <div class="ativo-metric-label">Part.</div>
+        <div class="ativo-metric-val">${part.toFixed(2)}%</div>
+      </div>
+      <div class="ativo-metric">
+        <div class="ativo-metric-label">Teto</div>
+        <div class="ativo-metric-val">${fmt(a.teto)}</div>
+      </div>
+      <div class="ativo-metric">
+        <div class="ativo-metric-label">PM</div>
+        <div class="ativo-metric-val">${fmt(a.pm)}</div>
+      </div>
+      <div class="ativo-metric">
+        <div class="ativo-metric-label">Qtd</div>
+        <div class="ativo-metric-val">${a.qtd}</div>
+      </div>
+      <div class="ativo-metric">
+        <div class="ativo-metric-label">Valor</div>
+        <div class="ativo-metric-val">${fmt(valorAtual)}</div>
+      </div>
+    </div>
+
+    <div class="ativo-ms-bar">
+      <div class="ativo-ms-fill" style="width:${barW}%;background:${msBarColor(ms)};"></div>
+    </div>
+  </div>`;
+}
+
+// ── RENDERS ───────────────────────────────────────────────────
+function sortAtivos(list, key){
+  const totalRV = list.reduce((s,a)=>s+a.qtd*getP(a.ticker,a.pm),0);
+  return [...list].sort((a,b)=>{
+    const pa = getP(a.ticker,a.pm), pb = getP(b.ticker,b.pm);
+    const msA = (a.teto-pa)/pa*100, msB = (b.teto-pb)/pb*100;
+    const partA = a.qtd*pa/totalRV, partB = b.qtd*pb/totalRV;
+    const rentA = (pa-a.pm)/a.pm, rentB = (pb-b.pm)/b.pm;
+    if(key==='ms-desc') return msB-msA;
+    if(key==='ms-asc') return msA-msB;
+    if(key==='part-desc') return partB-partA;
+    if(key==='rentab-desc') return rentB-rentA;
+    return 0;
+  });
+}
+
+function renderFiis(){
+  const sort = document.getElementById('sortFiis')?.value || 'default';
+  const list = sortAtivos(FIIS, sort);
+  document.getElementById('gridFiis').innerHTML = list.map(f=>ativoCard(f,true)).join('');
+}
+function renderAcoes(){
+  const sort = document.getElementById('sortAcoes')?.value || 'default';
+  const list = sortAtivos(ACOES, sort);
+  document.getElementById('gridAcoes').innerHTML = list.map(a=>ativoCard(a,false)).join('');
+}
+
+// ── PROVENTOS ────────────────────────────────────────────────
+function renderProventos(){
+  const now = new Date();
+  const y12 = new Date(now); y12.setFullYear(now.getFullYear()-1);
+  const ult = PROVENTOS.filter(p=>new Date(p.data+'T12:00')>=y12);
+  const total = ult.reduce((s,p)=>s+p.total,0);
+  document.getElementById('prov-total').textContent = fmt(total);
+  document.getElementById('prov-media').textContent = fmt(total/12);
+
+  const byMes = {};
+  ult.forEach(p=>{const m=p.data.slice(0,7);byMes[m]=(byMes[m]||0)+p.total;});
+  const best = Object.entries(byMes).sort((a,b)=>b[1]-a[1])[0];
+  if(best){
+    document.getElementById('prov-best').textContent = fmt(best[1]);
+    document.getElementById('prov-best-mes').textContent = best[0];
+  }
+
+  // Tabela
+  const sorted = [...PROVENTOS].sort((a,b)=>b.data.localeCompare(a.data));
+  const tipoMap = {Dividendo:'div',JCP:'jcp',Provento:'prov'};
+  document.getElementById('tbProvs').innerHTML = sorted.slice(0,40).map(p=>`<tr>
+    <td>${new Date(p.data+'T12:00').toLocaleDateString('pt-BR')}</td>
+    <td>${p.ticker}</td>
+    <td><span class="prov-badge ${tipoMap[p.tipo]||'prov'}">${p.tipo}</span></td>
+    <td>${fmt(p.vUnit)}</td>
+    <td>${p.qtd}</td>
+    <td class="td-green">${fmt(p.total)}</td>
+  </tr>`).join('');
+
+  // Gráfico mensal
+  const meses = Array.from({length:12},(_,i)=>{const d=new Date(now);d.setMonth(d.getMonth()-11+i);return d.toISOString().slice(0,7);});
+  const valMes = meses.map(m=>PROVENTOS.filter(p=>p.data.slice(0,7)===m).reduce((s,p)=>s+p.total,0));
+  const labMes = meses.map(m=>{const[y,mo]=m.split('-');return ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][+mo-1]+'/'+y.slice(2);});
+  new Chart(document.getElementById('cProvMes'),{type:'bar',
+    data:{labels:labMes,datasets:[{data:valMes,backgroundColor:valMes.map(v=>v>0?'#6366f1':'#e8eaed'),borderRadius:6,borderSkipped:false}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'#f0f2f5'},ticks:{callback:v=>'R$'+v.toFixed(0)}}}}});
+
+  // Por ativo
+  const byAtivo = {};
+  PROVENTOS.forEach(p=>{byAtivo[p.ticker]=(byAtivo[p.ticker]||0)+p.total;});
+  const sa = Object.entries(byAtivo).sort((a,b)=>b[1]-a[1]);
+  const COLORS = ['#6366f1','#2563eb','#16a34a','#d97706','#dc2626','#0ea5e9','#7c3aed','#059669','#ea580c'];
+  new Chart(document.getElementById('cProvAtivo'),{type:'doughnut',
+    data:{labels:sa.map(a=>a[0]),datasets:[{data:sa.map(a=>a[1]),backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},
+    options:{cutout:'60%',plugins:{legend:{position:'right',labels:{boxWidth:10,padding:8,font:{size:11}}}}}});
+}
+
+// ── CHARTS CARTEIRA ───────────────────────────────────────────
+function renderChartsCarteira(){
+  const vFiis = FIIS.reduce((s,f)=>s+f.qtd*getP(f.ticker,f.pm),0);
+  const vAcoes = ACOES.reduce((s,a)=>s+a.qtd*getP(a.ticker,a.pm),0);
+  const COLORS = ['#6366f1','#2563eb','#16a34a','#d97706','#dc2626','#0ea5e9','#7c3aed'];
+
+  new Chart(document.getElementById('cPie'),{type:'doughnut',
+    data:{labels:['FIIs','Ações BR','Renda Fixa'],datasets:[{data:[vFiis,vAcoes,57993.87],backgroundColor:['#6366f1','#2563eb','#94a3b8'],borderWidth:2,borderColor:'#fff'}]},
+    options:{cutout:'62%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10,font:{size:11}}}}}});
+
+  const setores = {};
+  ACOES.forEach(a=>{setores[a.setor]=(setores[a.setor]||0)+a.qtd*getP(a.ticker,a.pm);});
+  new Chart(document.getElementById('cSetores'),{type:'doughnut',
+    data:{labels:Object.keys(setores),datasets:[{data:Object.values(setores),backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},
+    options:{cutout:'60%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,padding:8,font:{size:10}}}}}});
+
+  const segs = {};
+  FIIS.forEach(f=>{segs[f.seg]=(segs[f.seg]||0)+f.qtd*getP(f.ticker,f.pm);});
+  new Chart(document.getElementById('cFiiSeg'),{type:'doughnut',
+    data:{labels:Object.keys(segs),datasets:[{data:Object.values(segs),backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},
+    options:{cutout:'60%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,padding:8,font:{size:10}}}}}});
+
+  // Projeção
+  const anos = ['2026','2027','2028','2029','2030','2031','2032','2033','2034','2035','2036'];
+  const renda = [369,478,800,1174,1391,1602,2060,2396,2600,2900,6407];
+  new Chart(document.getElementById('cProjecao'),{type:'line',
+    data:{labels:anos,datasets:[
+      {label:'Renda Passiva/mês',data:renda,borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.08)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:'#6366f1'},
+      {label:'Meta R$6.376',data:anos.map(()=>6376),borderColor:'#ea580c',borderDash:[6,3],pointRadius:0,borderWidth:1.5},
+      {label:'Meta R$5.000',data:anos.map(()=>5000),borderColor:'#d97706',borderDash:[4,2],pointRadius:0,borderWidth:1},
+    ]},
+    options:{interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10,font:{size:11}}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f0f2f5'},ticks:{callback:v=>'R$'+v}}}}});
+}
+
+// ── DESEMPENHO ────────────────────────────────────────────────
+function renderDesempenho(){
+  const byAno = {};
+  PROVENTOS.forEach(p=>{const y=p.data.slice(0,4);byAno[y]=(byAno[y]||0)+p.total;});
+  const anos = Object.keys(byAno).sort();
+  const vals = anos.map(a=>byAno[a]);
+  const maxV = Math.max(...vals);
+  document.getElementById('desempRows').innerHTML = anos.map((a,i)=>`
+    <div class="desemp-row">
+      <div class="desemp-ano">${a}</div>
+      <div class="desemp-track"><div class="desemp-fill" style="width:${vals[i]/maxV*100}%"></div></div>
+      <div class="desemp-val">${fmt(vals[i])}</div>
+    </div>`).join('');
+
+  new Chart(document.getElementById('cProvAnual'),{type:'bar',
+    data:{labels:anos,datasets:[{label:'Proventos',data:vals,backgroundColor:'#6366f1',borderRadius:8,borderSkipped:false}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'#f0f2f5'},ticks:{callback:v=>'R$'+v.toFixed(0)}}}}});
+}
+
+// ── NOTÍCIAS ─────────────────────────────────────────────────
+function renderNews(){
+  const news = [
+    {tag:'BBSE3',title:'BB Seguridade anuncia dividendos de R$ 0,54 por ação',date:'22/05/2026',fonte:'InfoMoney'},
+    {tag:'BTLG11',title:'BTG Logística registra alta na ocupação dos galpões no 1T26',date:'21/05/2026',fonte:'Funds Explorer'},
+    {tag:'TRXB11',title:'TRX Real Estate distribui R$ 2,29/cota referente a abril',date:'20/05/2026',fonte:'Suno'},
+    {tag:'CXSE3',title:'Caixa Seguridade reporta crescimento de 12% nos prêmios emitidos',date:'19/05/2026',fonte:'Valor Econômico'},
+    {tag:'KNCR11',title:'KNCR11 mantém distribuição mensal acima de R$ 1,20/cota',date:'18/05/2026',fonte:'Funds Explorer'},
+    {tag:'HGBS11',title:'Shopping centers registram alta no fluxo de visitantes no 1T26',date:'17/05/2026',fonte:'CRI/CRA News'},
+    {tag:'BBAS3',title:'Banco do Brasil anuncia programa de recompra de ações',date:'16/05/2026',fonte:'Valor Econômico'},
+    {tag:'SBSP3',title:'Sabesp divulga resultados do 1T26 com expansão de EBITDA',date:'15/05/2026',fonte:'InfoMoney'},
+  ];
+  const html = n => `<div class="news-item">
+    <span class="news-tk">${n.tag}</span>
+    <div><div class="news-title">${n.title}</div><div class="news-meta">${n.date} · ${n.fonte}</div></div>
+  </div>`;
+  document.getElementById('newsMain').innerHTML = news.slice(0,4).map(html).join('');
+  document.getElementById('newsAlt').innerHTML = news.slice(4).map(html).join('');
+}
+
+// ── ATENÇÃO ───────────────────────────────────────────────────
+function renderAtencao(){
+  const pontos = [
+    {tipo:'buy',icon:'📈',title:'TRXB11 — DY 15,6% a.a. — Prioridade nos aportes',desc:'Maior DY da carteira. Marcado como Comprar. Priorizar nos aportes mensais e na migração do Tesouro em 2028.'},
+    {tipo:'buy',icon:'📈',title:'BBSE3 — DY 13,2% a.a. — Excelente seguradora',desc:'DY acima de 13%. Aumentou para 141 ações. Continuar aportando nos meses de maior disponibilidade.'},
+    {tipo:'buy',icon:'🏦',title:'Tesouro SELIC vence dez/2028 — R$ 25.315 projetados',desc:'Preparar estratégia de migração para RV: priorizar BTLG11, HGBS11 e BBSE3 no reinvestimento integral.'},
+    {tipo:'buy',icon:'🎯',title:'Meta: aportar R$ 25.000 até dez/2026',desc:'TRXB11 (20%), BBSE3 (20%), BTLG11 (15%), KNCR11 (15%), RBRY11 (10%), HGBS11 (10%), CXSE3 (10%). DY médio do lote: 13,2%.'},
+    {tipo:'warn',icon:'⚠️',title:'CSAN3 e VAMO3 — não aportar por ora',desc:'Ambos com rentabilidade abaixo da meta e DY reduzido. Manter posição atual sem novos aportes até recuperação operacional dos negócios.'},
+    {tipo:'warn',icon:'📊',title:'DY médio RV atual: 9,6% — meta é 13%',desc:'Para atingir a meta de independência financeira em 2036, é necessário elevar o DY médio da carteira. Focar aportes em TRXB11, KNCR11 e RBRY11.'},
+    {tipo:'info',icon:'💡',title:'Aporte de R$ 750/mês: distribua 40% FIIs / 40% Ações / 20% Internacional',desc:'Distribuição recomendada para maximizar renda passiva mantendo diversificação e proteção cambial com VOO, ACWI e MELI.'},
+  ];
+  const tipoMap = {buy:'buy',warn:'warn',info:'info'};
+  document.getElementById('atencaoList').innerHTML = pontos.map(p=>`
+    <div class="atc-item ${tipoMap[p.tipo]}">
+      <div class="atc-icon">${p.icon}</div>
+      <div><div class="atc-title">${p.title}</div><div class="atc-desc">${p.desc}</div></div>
+    </div>`).join('');
+}
+
+// ── NAVEGAÇÃO ─────────────────────────────────────────────────
+const rendered = {};
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    const pg = tab.dataset.page;
+    document.getElementById('page-'+pg).classList.add('active');
+    if(!rendered[pg]){
+      rendered[pg]=true;
+      if(pg==='fiis') renderFiis();
+      if(pg==='acoes') renderAcoes();
+      if(pg==='proventos') renderProventos();
+      if(pg==='noticias') renderNews();
+      if(pg==='atencao') renderAtencao();
+      if(pg==='desempenho') renderDesempenho();
+    }
+  });
+});
+
+// ── INIT ─────────────────────────────────────────────────────
+async function init(){
+  setupDate();
+  updateKPIs();
+  renderChartsCarteira();
+  renderTicker();
+  await fetchPrices();
+  setInterval(fetchPrices, 60000);
+}
+init();
+</script>
+</body>
+</html>
